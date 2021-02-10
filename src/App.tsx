@@ -1,8 +1,13 @@
 import React from 'react';
+import { Provider } from 'react-redux';
+import Search from './components/Search';
+import store from './store';
 
-function App() {
+function App(): JSX.Element {
   return (
-    <h1>CEPS Data</h1>
+    <Provider store={store}>
+      <Search />
+    </Provider>
   );
 }
 
