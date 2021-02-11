@@ -4,6 +4,7 @@ export interface IAddress {
   bairro: string;
   localidade: string;
   uf: string;
+  erro: boolean;
 }
 
 export interface IAddressState {
