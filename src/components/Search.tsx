@@ -1,36 +1,29 @@
-import React, { FormEvent, useState } from 'react';
-import {} from 'react-redux';
+import React, { useCallback, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { IState } from '../store';
 
-import api from '../services/api';
-import { IAddress } from '../store/modules/address/types';
-
-// import { Container } from './styles';
+import { searchAddressFromApi } from '../store/modules/address/actions';
+import { IAddressState } from '../store/modules/address/types';
 
 const Search: React.FC = () => {
+  const addressData = useSelector<IState, IAddressState>(state => state.data);
+
+  const dispatch = useDispatch();
   const [newCep, setNewCep] = useState('');
-  const [address, setAddress] = useState<IAddress>({} as IAddress);
 
-  async function handleSearchAddress(
-    event: FormEvent<HTMLFormElement>,
-  ): Promise<void> {
-    event.preventDefault();
+  const handleSearchAddressFromApi = useCallback(
+    event => {
+      event.preventDefault();
 
-    try {
-      const response = await api.get(`${newCep}/json/`);
-
-      const newAddress = response.data;
-
-      setAddress(newAddress);
-      setNewCep('');
-    } catch (err) {
-      console.log('error');
-    }
-  }
+      dispatch(searchAddressFromApi(newCep));
+    },
+    [dispatch, newCep],
+  );
 
   return (
     <>
       <h1>Buscar CEP</h1>
-      <form onSubmit={handleSearchAddress}>
+      <form onSubmit={handleSearchAddressFromApi}>
         <input
           value={newCep}
           onChange={e => setNewCep(e.target.value)}
@@ -42,44 +35,11 @@ const Search: React.FC = () => {
         <button style={{ marginLeft: '10px' }} type="submit">
           Pesquisar
         </button>
-      </form>
 
-      {address.cep !== undefined &&
-        Object.keys(address).length !== 0 &&
-        address.constructor === Object && (
-          <div>
-            <h3>
-              Endereço para
-              {` ${address.cep}`}
-            </h3>
-
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <strong>Logradouro: </strong>
-              <p style={{ marginLeft: '10px' }}>{`${address.logradouro}`}</p>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <strong>Bairro: </strong>
-              <p style={{ marginLeft: '10px' }}>{`${address.bairro}`}</p>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <strong>Cidade: </strong>
-              <p style={{ marginLeft: '10px' }}>{`${address.localidade}`}</p>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <strong>Estado: </strong>
-              <p style={{ marginLeft: '10px' }}>{`${address.uf}`}</p>
-            </div>
-          </div>
-        )}
-
-      {address.erro && (
-        <div>
+        {addressData.error && (
           <p style={{ color: 'red' }}>CEP não encontrado, digite novamente.</p>
-        </div>
-      )}
+        )}
+      </form>
     </>
   );
 };
